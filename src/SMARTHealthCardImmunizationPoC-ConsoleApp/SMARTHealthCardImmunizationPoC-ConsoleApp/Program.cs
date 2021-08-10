@@ -182,7 +182,8 @@ namespace SMARTHealthCardImmunizationPoC_ConsoleApp
             List<VerifiableCredentialType> VerifiableCredentialTypeList = new List<VerifiableCredentialType>()
               {
                 VerifiableCredentialType.HealthCard,
-                VerifiableCredentialType.Covid19
+                VerifiableCredentialType.Covid19,
+                VerifiableCredentialType.Immunization
               };
 
             //Instantiate and populate the Smart Health Card Model with the properties we just setup

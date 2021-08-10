@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>SMARTHealthCardImmunizationPoC_ConsoleApp</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Hl7.Fhir.R4" Version="3.4.0" />
+    <PackageReference Include="SmartHealthCard.QRCode" Version="1.0.0" />
+    <PackageReference Include="SmartHealthCard.Token" Version="1.0.0" />
+  </ItemGroup>
+
+</Project>

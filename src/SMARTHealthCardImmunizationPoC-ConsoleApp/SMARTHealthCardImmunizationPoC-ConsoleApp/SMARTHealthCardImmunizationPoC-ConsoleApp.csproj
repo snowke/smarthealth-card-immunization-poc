@@ -8,8 +8,8 @@
 
   <ItemGroup>
     <PackageReference Include="Hl7.Fhir.R4" Version="3.4.0" />
-    <PackageReference Include="SmartHealthCard.QRCode" Version="1.0.0" />
-    <PackageReference Include="SmartHealthCard.Token" Version="1.0.0" />
+    <PackageReference Include="SmartHealthCard.QRCode" Version="1.0.1" />
+    <PackageReference Include="SmartHealthCard.Token" Version="1.0.1" />
   </ItemGroup>
 
 </Project>

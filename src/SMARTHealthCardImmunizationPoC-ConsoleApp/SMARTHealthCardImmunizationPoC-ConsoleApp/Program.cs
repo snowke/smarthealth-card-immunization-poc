@@ -2,6 +2,7 @@
 using Hl7.Fhir.Serialization;
 using SmartHealthCard.QRCode;
 using SmartHealthCard.Token;
+using SmartHealthCard.Token.Certificates;
 using SmartHealthCard.Token.Exceptions;
 using SmartHealthCard.Token.Model.Shc;
 using System;
@@ -27,8 +28,9 @@ namespace SMARTHealthCardImmunizationPoC_ConsoleApp
     /// FHIR Immunization Resource
     ///     https://www.hl7.org/fhir/immunization.html
     ///     
-    /// Nice article about decoding
+    /// Relevant article(s) 
     ///     https://www.eff.org/deeplinks/2021/06/decoding-californias-new-digital-vaccine-records-and-potential-dangers
+    ///     https://vishnuravi.medium.com/how-do-verifiable-covid-19-vaccination-records-with-smart-health-cards-work-df099370b27a
     ///     
     /// Creating Elliptical Curve Keys using OpenSSL
     ///     https://www.scottbrady91.com/OpenSSL/Creating-Elliptical-Curve-Keys-using-OpenSSL
@@ -53,6 +55,10 @@ namespace SMARTHealthCardImmunizationPoC_ConsoleApp
     ///     For testing purposes we are creating a value near identical to one of the published examples
     ///     https://spec.smarthealth.cards/examples/example-00-b-jws-payload-expanded.json
     /// </remarks>
+    /// <remarks>
+    ///     iis urls should be meaningful, if there is not reference to the name in the trust framework 
+    ///     then the url is all you have to display to the user
+    /// </remarks>
     class Program
     {
         static void Main(string[] args)
@@ -66,8 +72,14 @@ namespace SMARTHealthCardImmunizationPoC_ConsoleApp
             //Get the Certificate containing a private Elliptic Curve key using the P-256 curve
             //from the Windows Certificate Store by Thumb-print
             string CertificateThumbprint = "4cdfd4d8b070a894bc701a49cab2ba18f724c2c7";
+            X509Certificate2 Certificate = X509CertificateSupport.GetFirstMatchingCertificate(
+                  CertificateThumbprint.ToUpper(),
+                  X509FindType.FindByThumbprint,
+                  StoreName.My,
+                  StoreLocation.CurrentUser,
+                  true
+                  );
 
-            var Certificate = GetCertificate(CertificateThumbprint, StoreName.My, StoreLocation.CurrentUser);
 
             //Set the Version of FHIR in use
             string FhirVersion = "4.0.1";
@@ -75,9 +87,10 @@ namespace SMARTHealthCardImmunizationPoC_ConsoleApp
             var FhirBundleJson = await GetTestFhirBundle();
 
             //Set the base of the URL where any validator will retrieve the public keys from (e.g : [Issuer]/.well-known/jwks.json) 
-            //Uri Issuer = new Uri("https://testing.envisiontechnology.com/HL7SmartHealthCardDemo");
-            // Try all lowercase
-            Uri Issuer = new Uri("https://testing.envisiontechnology.com/hl7Smarthealthcarddemo");
+            
+            // Just to be safe, set to all lowercase, register like this as well.  This is safety measure in case the verifier has
+            // any sort of case sensitive code
+            Uri Issuer = new Uri("https://testing.envisiontechnology.com/hl7smarthealthcarddemo".ToLower()); 
 
             //Set when the Smart Health Card becomes valid, (e.g the from date).
             DateTimeOffset IssuanceDateTimeOffset = DateTimeOffset.Now.AddMinutes(-1);
@@ -214,27 +227,6 @@ namespace SMARTHealthCardImmunizationPoC_ConsoleApp
             });
 
             return await serializer.SerializeToStringAsync(bundle);
-        }
-
-        private static X509Certificate2 GetCertificate(string thumpprint, StoreName storeName, StoreLocation storeLocation)
-        {
-            var store = new X509Store(storeName, storeLocation);
-
-            try
-            {
-                store.Open(OpenFlags.ReadOnly);
-                var certificateCollection = store.Certificates.Find(X509FindType.FindByThumbprint, thumpprint, false);
-
-                if (certificateCollection.Count == 0)
-                {
-                    throw new Exception("Certificate is not installed");
-                }
-                return certificateCollection[0];
-            }
-            finally
-            {
-                store.Close();
-            }
         }
     }
 }
